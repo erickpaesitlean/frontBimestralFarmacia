@@ -1,6 +1,8 @@
-# 💊 Sistema de Gestão de Farmácia
+# 💊 Sistema de Gestão de Farmácia - Frontend
 
 Frontend desenvolvido em **React + TypeScript** para gerenciamento completo de farmácia.
+
+> ⚠️ **Este frontend consome a API REST do backend em Java/Spring Boot construído anteriormente.**
 
 ## 🚀 Tecnologias
 
@@ -17,6 +19,10 @@ React 18 • TypeScript • Vite • TailwindCSS • Axios • React Hook Form +
 
 ## 🚀 Início Rápido
 
+### Pré-requisitos
+
+✅ **Backend em Java/Spring Boot rodando** (porta 8080)
+
 ### Instalação
 
 ```bash
@@ -25,7 +31,7 @@ npm install
 
 ### Configuração
 
-Crie um arquivo `.env`:
+Crie um arquivo `.env` apontando para o backend:
 
 ```env
 VITE_API_BASE_URL=http://localhost:8080
@@ -62,4 +68,8 @@ npm run preview  # Preview do build
 
 ## 🔗 Backend
 
-Integrado com API Spring Boot. Ver [REQUISITOS_BACKEND_FARMACIA.md](./REQUISITOS_BACKEND_FARMACIA.md)
+Este frontend é a interface para o **backend em Java/Spring Boot** construído anteriormente.
+
+- **Autenticação**: HTTP Basic Auth
+- **Endpoints**: Ver [REQUISITOS_BACKEND_FARMACIA.md](./REQUISITOS_BACKEND_FARMACIA.md)
+- **Porta padrão**: 8080
