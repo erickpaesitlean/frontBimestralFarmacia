@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* CORES PRINCIPAIS DA LOGO */
+    --dsp-blue: #0D3B6A;
+    --dsp-red: #E31837;
+    --dsp-white: #FFFFFF;
+
+    /* CORES COMPLEMENTARES */
+    --dsp-light-blue: #1E6AB2;
+    --dsp-gray-light: #F5F7FA;
+    --dsp-gray-medium: #8C9BAD;
+    --dsp-gray-dark: #2C3E50;
+
+    /* SEMÂNTICAS */
+    --dsp-success: #28A745;
+    --dsp-warning: #FFC107;
+    --dsp-danger: #DC3545;
+
+    /* ===== LIGHT MODE TOKENS ===== */
+    --bg-primary: #F5F7FA;
+    --bg-secondary: #FFFFFF;
+    --bg-tertiary: #F8F9FA;
+    --bg-hover: #E9ECEF;
+    
+    --text-primary: #2C3E50;
+    --text-secondary: #6C757D;
+    --text-tertiary: #8C9BAD;
+    --text-inverse: #FFFFFF;
+    
+    --border-primary: #E9ECEF;
+    --border-secondary: #DEE2E6;
+    --border-focus: #0D3B6A;
+    
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.16);
+
+    /* Compatibilidade com nomes antigos */
+    --drogaria-primary: #0D3B6A;
+    --drogaria-primary-dark: #1E6AB2;
+    --drogaria-primary-light: #E6F2FC;
+    --drogaria-secondary: #28A745;
+    --drogaria-secondary-dark: #1E7E34;
+    --drogaria-secondary-light: #D4EDDA;
+    --drogaria-accent: #E31837;
+    --drogaria-accent-dark: #C1121F;
+    --drogaria-accent-light: #FFE5E5;
+    --drogaria-warning: #FFC107;
+    --drogaria-danger: #DC3545;
+    --drogaria-light: #F5F7FA;
+    --drogaria-dark: #2C3E50;
+    --drogaria-gray-light: #F5F7FA;
+    --drogaria-gray-medium: #8C9BAD;
+    --drogaria-gray-dark: #2C3E50;
+  }
+
+  [data-theme='dark'] {
+    /* ===== DARK MODE TOKENS ===== */
+    --bg-primary: #0F172A;
+    --bg-secondary: #1E293B;
+    --bg-tertiary: #334155;
+    --bg-hover: #475569;
+    
+    --text-primary: #F1F5F9;
+    --text-secondary: #CBD5E1;
+    --text-tertiary: #94A3B8;
+    --text-inverse: #0F172A;
+    
+    --border-primary: #334155;
+    --border-secondary: #475569;
+    --border-focus: #3B82F6;
+    
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+    /* Ajustes para cores da marca no dark mode */
+    --drogaria-primary: #60A5FA;
+    --drogaria-primary-dark: #3B82F6;
+    --drogaria-primary-light: #1E3A8A;
+    --drogaria-accent: #DC2626;
+    --drogaria-accent-dark: #B91C1C;
+    --drogaria-light: #1E293B;
+    --drogaria-dark: #F1F5F9;
+    --drogaria-gray-light: #334155;
+    --drogaria-gray-medium: #94A3B8;
+    --drogaria-gray-dark: #CBD5E1;
+  }
+
+  * {
+    @apply border-gray-200;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', 'Roboto', '-apple-system', 'BlinkMacSystemFont', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  h1 {
+    @apply text-h1 font-bold;
+    color: var(--drogaria-primary);
+  }
+
+  [data-theme='dark'] h1 {
+    color: var(--drogaria-primary);
+  }
+
+  h2 {
+    @apply text-h2 font-semibold;
+    color: var(--drogaria-primary);
+  }
+
+  [data-theme='dark'] h2 {
+    color: var(--drogaria-primary);
+  }
+
+  h3 {
+    @apply text-h3 font-semibold;
+    color: var(--text-primary);
+  }
+
+  a {
+    color: var(--drogaria-primary);
+    @apply underline-offset-4 hover:underline;
+  }
+
+  [data-theme='dark'] a {
+    color: var(--drogaria-primary);
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
