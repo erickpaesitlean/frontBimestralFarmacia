@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { TrendingDown, Clock, Bell } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
 
 export function AlertaIndexPage() {
   const navigate = useNavigate()

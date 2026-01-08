@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Layers, Users, Pill, Receipt, TrendingUp, ArrowRight, AlertTriangle, Clock } from 'lucide-react'
@@ -12,6 +12,105 @@ interface DashboardStats {
   clientes: number
   medicamentos: number
   vendas: number
+}
+
+type ColorKey = 'drogaria-primary' | 'drogaria-secondary' | 'drogaria-accent'
+
+const COLOR_CLASSES: Record<ColorKey, { bg: string; hover: string; text: string; border: string; light: string }> = {
+  'drogaria-primary': {
+    bg: 'bg-drogaria-primary',
+    hover: 'hover:bg-drogaria-primary-dark',
+    text: 'text-drogaria-primary',
+    border: 'border-drogaria-primary',
+    light: 'bg-drogaria-primary-light',
+  },
+  'drogaria-secondary': {
+    bg: 'bg-drogaria-secondary',
+    hover: 'hover:bg-drogaria-secondary-dark',
+    text: 'text-drogaria-secondary',
+    border: 'border-drogaria-secondary',
+    light: 'bg-drogaria-secondary-light',
+  },
+  'drogaria-accent': {
+    bg: 'bg-drogaria-accent',
+    hover: 'hover:bg-drogaria-accent-dark',
+    text: 'text-drogaria-accent',
+    border: 'border-drogaria-accent',
+    light: 'bg-drogaria-accent-light',
+  },
+}
+
+function getColorClasses(color: ColorKey) {
+  return COLOR_CLASSES[color] ?? COLOR_CLASSES['drogaria-primary']
+}
+
+type AlertListItem = {
+  id: number
+  nome: string
+  categoria: string
+  badgeText: string
+  badgeClassName: string
+}
+
+function DashboardAlertCard(props: {
+  title: string
+  subtitle?: string
+  icon: React.ReactNode
+  isLoading: boolean
+  isUnavailable: boolean
+  emptyText: string
+  items: AlertListItem[]
+}) {
+  const { title, subtitle, icon, isLoading, isUnavailable, emptyText, items } = props
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="bg-[var(--bg-secondary)] rounded-card p-6 border border-[var(--border-primary)] shadow-drogaria"
+    >
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <div className="flex items-center gap-2">
+          {icon}
+          <div>
+            <h2 className="text-h3 text-[var(--text-primary)]">{title}</h2>
+            {subtitle ? <p className="text-xs text-[var(--text-tertiary)]">{subtitle}</p> : null}
+          </div>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <p className="text-sm text-[var(--text-secondary)]">Carregando alertas...</p>
+      ) : isUnavailable ? (
+        <p className="text-sm text-[var(--text-secondary)]">Não foi possível carregar.</p>
+      ) : items.length === 0 ? (
+        <p className="text-sm text-[var(--text-secondary)]">{emptyText}</p>
+      ) : (
+        <div className="space-y-2">
+          {items.slice(0, 10).map((item) => (
+            <div
+              key={item.id}
+              className="flex items-center justify-between gap-3 p-3 rounded-lg border border-[var(--border-primary)] bg-[var(--bg-tertiary)]"
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-[var(--text-primary)] truncate">{item.nome}</p>
+                <p className="text-xs text-[var(--text-tertiary)] truncate">{item.categoria}</p>
+              </div>
+              <span
+                className={cn(
+                  'inline-flex px-2.5 py-1 text-xs font-bold rounded-full border flex-shrink-0',
+                  item.badgeClassName
+                )}
+              >
+                {item.badgeText}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </motion.div>
+  )
 }
 
 export function DashboardPage() {
@@ -29,6 +128,8 @@ export function DashboardPage() {
   const [alertaValidade, setAlertaValidade] = useState<AlertaValidadeResponseDTO | null>(null)
 
   useEffect(() => {
+    let cancelled = false
+
     async function loadStats() {
       try {
         const [categoriasRes, clientesRes, medicamentosRes, vendasRes] = await Promise.all([
@@ -38,16 +139,18 @@ export function DashboardPage() {
           api.get('/api/vendas'),
         ])
 
-        setStats({
+        if (cancelled) return
+        setStats((prev) => ({
+          ...prev,
           categorias: categoriasRes.data.length,
           clientes: clientesRes.data.length,
           medicamentos: medicamentosRes.data.length,
           vendas: vendasRes.data.length,
-        })
+        }))
       } catch (error) {
         showToast('error', 'Erro ao carregar estatísticas')
       } finally {
-        setIsLoading(false)
+        if (!cancelled) setIsLoading(false)
       }
     }
 
@@ -58,50 +161,82 @@ export function DashboardPage() {
           alertaService.estoqueBaixo(10),
           alertaService.validadeProxima(30),
         ])
+        if (cancelled) return
         setAlertaEstoque(estoque)
         setAlertaValidade(validade)
       } catch (error) {
         // Não travar o dashboard por isso — só notificar
         showToast('error', 'Erro ao carregar alertas do dashboard')
       } finally {
-        setIsLoadingAlertas(false)
+        if (!cancelled) setIsLoadingAlertas(false)
       }
     }
 
     loadStats()
     loadAlertasDashboard()
+
+    return () => {
+      cancelled = true
+    }
   }, [showToast])
 
-  const statCards = [
-    {
-      label: 'Categorias',
-      value: stats.categorias,
-      icon: Layers,
-      color: 'drogaria-primary',
-      path: '/categorias',
-    },
-    {
-      label: 'Clientes',
-      value: stats.clientes,
-      icon: Users,
-      color: 'drogaria-secondary',
-      path: '/clientes',
-    },
-    {
-      label: 'Medicamentos',
-      value: stats.medicamentos,
-      icon: Pill,
-      color: 'drogaria-primary',
-      path: '/medicamentos',
-    },
-    {
-      label: 'Vendas',
-      value: stats.vendas,
-      icon: Receipt,
-      color: 'drogaria-accent',
-      path: '/vendas',
-    },
-  ]
+  const statCards = useMemo(
+    () => [
+      {
+        label: 'Categorias',
+        value: stats.categorias,
+        icon: Layers,
+        color: 'drogaria-primary' as const,
+        path: '/categorias',
+      },
+      {
+        label: 'Clientes',
+        value: stats.clientes,
+        icon: Users,
+        color: 'drogaria-secondary' as const,
+        path: '/clientes',
+      },
+      {
+        label: 'Medicamentos',
+        value: stats.medicamentos,
+        icon: Pill,
+        color: 'drogaria-primary' as const,
+        path: '/medicamentos',
+      },
+      {
+        label: 'Vendas',
+        value: stats.vendas,
+        icon: Receipt,
+        color: 'drogaria-accent' as const,
+        path: '/vendas',
+      },
+    ],
+    [stats]
+  )
+
+  const estoqueItems: AlertListItem[] = useMemo(() => {
+    if (!alertaEstoque) return []
+    return alertaEstoque.medicamentos.map((med) => ({
+      id: med.id,
+      nome: med.nome,
+      categoria: med.categoria,
+      badgeText: String(med.quantidadeEstoque),
+      badgeClassName:
+        'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700',
+    }))
+  }, [alertaEstoque])
+
+  const validadeItems: AlertListItem[] = useMemo(() => {
+    if (!alertaValidade) return []
+    return alertaValidade.medicamentos.map((med) => ({
+      id: med.id,
+      nome: med.nome,
+      categoria: med.categoria,
+      badgeText: new Date(med.dataValidade).toLocaleDateString('pt-BR'),
+      badgeClassName:
+        'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700',
+    }))
+  }, [alertaValidade])
 
   if (isLoading) {
     return (
@@ -112,43 +247,6 @@ export function DashboardPage() {
         </div>
       </div>
     )
-  }
-
-  const getColorClasses = (color: string) => {
-    switch (color) {
-      case 'drogaria-primary':
-        return {
-          bg: 'bg-drogaria-primary',
-          hover: 'hover:bg-drogaria-primary-dark',
-          text: 'text-drogaria-primary',
-          border: 'border-drogaria-primary',
-          light: 'bg-drogaria-primary-light',
-        }
-      case 'drogaria-secondary':
-        return {
-          bg: 'bg-drogaria-secondary',
-          hover: 'hover:bg-drogaria-secondary-dark',
-          text: 'text-drogaria-secondary',
-          border: 'border-drogaria-secondary',
-          light: 'bg-drogaria-secondary-light',
-        }
-      case 'drogaria-accent':
-        return {
-          bg: 'bg-drogaria-accent',
-          hover: 'hover:bg-drogaria-accent-dark',
-          text: 'text-drogaria-accent',
-          border: 'border-drogaria-accent',
-          light: 'bg-drogaria-accent-light',
-        }
-      default:
-        return {
-          bg: 'bg-drogaria-primary',
-          hover: 'hover:bg-drogaria-primary-dark',
-          text: 'text-drogaria-primary',
-          border: 'border-drogaria-primary',
-          light: 'bg-drogaria-primary-light',
-        }
-    }
   }
 
   return (
@@ -207,89 +305,25 @@ export function DashboardPage() {
       {/* Alertas (padrão 10) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         {/* Estoque baixo */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.35 }}
-          className="bg-[var(--bg-secondary)] rounded-card p-6 border border-[var(--border-primary)] shadow-drogaria"
-        >
-          <div className="flex items-start justify-between gap-4 mb-4">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 stroke-[1.75]" />
-              <div>
-                <h2 className="text-h3 text-[var(--text-primary)]">Estoque baixo</h2>
-              </div>
-            </div>
-          </div>
-
-          {isLoadingAlertas ? (
-            <p className="text-sm text-[var(--text-secondary)]">Carregando alertas...</p>
-          ) : !alertaEstoque ? (
-            <p className="text-sm text-[var(--text-secondary)]">Não foi possível carregar.</p>
-          ) : alertaEstoque.medicamentos.length === 0 ? (
-            <p className="text-sm text-[var(--text-secondary)]">Nenhum medicamento com estoque baixo.</p>
-          ) : (
-            <div className="space-y-2">
-              {alertaEstoque.medicamentos.slice(0, 10).map((med) => (
-                <div
-                  key={med.id}
-                  className="flex items-center justify-between gap-3 p-3 rounded-lg border border-[var(--border-primary)] bg-[var(--bg-tertiary)]"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-[var(--text-primary)] truncate">{med.nome}</p>
-                    <p className="text-xs text-[var(--text-tertiary)] truncate">{med.categoria}</p>
-                  </div>
-                  <span className="inline-flex px-2.5 py-1 text-xs font-bold rounded-full bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-700 flex-shrink-0">
-                    {med.quantidadeEstoque}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </motion.div>
+        <DashboardAlertCard
+          title="Estoque baixo"
+          icon={<AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 stroke-[1.75]" />}
+          isLoading={isLoadingAlertas}
+          isUnavailable={!alertaEstoque}
+          emptyText="Nenhum medicamento com estoque baixo."
+          items={estoqueItems}
+        />
 
         {/* Validade próxima */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.45 }}
-          className="bg-[var(--bg-secondary)] rounded-card p-6 border border-[var(--border-primary)] shadow-drogaria"
-        >
-          <div className="flex items-start justify-between gap-4 mb-4">
-            <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-yellow-600 dark:text-yellow-400 stroke-[1.75]" />
-              <div>
-                <h2 className="text-h3 text-[var(--text-primary)]">Validade próxima</h2>
-                <p className="text-xs text-[var(--text-tertiary)]">Próximos 30 dias</p>
-              </div>
-            </div>
-          </div>
-
-          {isLoadingAlertas ? (
-            <p className="text-sm text-[var(--text-secondary)]">Carregando alertas...</p>
-          ) : !alertaValidade ? (
-            <p className="text-sm text-[var(--text-secondary)]">Não foi possível carregar.</p>
-          ) : alertaValidade.medicamentos.length === 0 ? (
-            <p className="text-sm text-[var(--text-secondary)]">Nenhum medicamento com validade próxima.</p>
-          ) : (
-            <div className="space-y-2">
-              {alertaValidade.medicamentos.slice(0, 10).map((med) => (
-                <div
-                  key={med.id}
-                  className="flex items-center justify-between gap-3 p-3 rounded-lg border border-[var(--border-primary)] bg-[var(--bg-tertiary)]"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-[var(--text-primary)] truncate">{med.nome}</p>
-                    <p className="text-xs text-[var(--text-tertiary)] truncate">{med.categoria}</p>
-                  </div>
-                  <span className="inline-flex px-2.5 py-1 text-xs font-bold rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700 flex-shrink-0">
-                    {new Date(med.dataValidade).toLocaleDateString('pt-BR')}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </motion.div>
+        <DashboardAlertCard
+          title="Validade próxima"
+          subtitle="Próximos 30 dias"
+          icon={<Clock className="w-5 h-5 text-yellow-600 dark:text-yellow-400 stroke-[1.75]" />}
+          isLoading={isLoadingAlertas}
+          isUnavailable={!alertaValidade}
+          emptyText="Nenhum medicamento com validade próxima."
+          items={validadeItems}
+        />
       </div>
 
       {/* Quick Actions */}

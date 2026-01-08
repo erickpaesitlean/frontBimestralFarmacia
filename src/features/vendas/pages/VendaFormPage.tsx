@@ -70,7 +70,6 @@ export function VendaFormPage() {
     watch,
     setFocus,
     setValue,
-    setError,
     clearErrors,
   } = useForm<VendaFormData>({
     resolver: zodResolver(vendaSchema),

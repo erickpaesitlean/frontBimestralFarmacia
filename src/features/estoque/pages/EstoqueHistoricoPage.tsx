@@ -58,6 +58,10 @@ export function EstoqueHistoricoPage() {
   const [medicamentoSelecionado, setMedicamentoSelecionado] = useState<{ id: number; nome: string } | null>(null)
   const medInputRef = useRef<HTMLInputElement>(null)
 
+  const medInputId = 'estoque-historico-medicamento-input'
+  const medListboxId = 'estoque-historico-medicamento-listbox'
+  const getMedOptionId = (id: number) => `estoque-historico-medicamento-option-${id}`
+
   useEffect(() => {
     load()
   }, [])
@@ -216,6 +220,7 @@ export function EstoqueHistoricoPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-tertiary)] pointer-events-none stroke-[1.75]" />
                 <input
                   ref={medInputRef}
+                  id={medInputId}
                   type="text"
                   value={medicamentoBusca}
                   onChange={(e) => {
@@ -229,6 +234,16 @@ export function EstoqueHistoricoPage() {
                     if (medicamentoBusca.trim().length > 0) setMostrarSugestoes(true)
                   }}
                   placeholder="Digite para buscar medicamento"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-haspopup="listbox"
+                  aria-expanded={mostrarSugestoes}
+                  aria-controls={medListboxId}
+                  aria-activedescendant={
+                    mostrarSugestoes && medicamentosFiltrados[sugestaoAtiva]
+                      ? getMedOptionId(medicamentosFiltrados[sugestaoAtiva].id)
+                      : undefined
+                  }
                   className={cn(
                     'w-full pl-11 pr-10 py-2.5',
                     'bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl',
@@ -243,6 +258,7 @@ export function EstoqueHistoricoPage() {
                     onClick={handleLimparMedicamento}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-red-500 transition-colors"
                     title="Limpar filtro de medicamento"
+                    aria-label="Limpar filtro de medicamento"
                   >
                     <X className="w-4 h-4 stroke-[2]" />
                   </button>
@@ -252,6 +268,9 @@ export function EstoqueHistoricoPage() {
               <AnimatePresence>
                 {mostrarSugestoes && medicamentoBusca.trim().length > 0 && (
                   <motion.div
+                    id={medListboxId}
+                    role="listbox"
+                    aria-label="Sugestões de medicamentos"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
@@ -259,12 +278,18 @@ export function EstoqueHistoricoPage() {
                     className="absolute left-0 right-0 z-[100] mt-1 bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl shadow-2xl max-h-64 overflow-y-auto"
                   >
                     {medicamentosFiltrados.length === 0 ? (
-                      <div className="px-4 py-3 text-sm text-[var(--text-secondary)]">Nenhum medicamento encontrado.</div>
+                      <div role="status" className="px-4 py-3 text-sm text-[var(--text-secondary)]">
+                        Nenhum medicamento encontrado.
+                      </div>
                     ) : (
                       medicamentosFiltrados.map((med, idx) => (
                         <button
                           key={med.id}
+                          id={getMedOptionId(med.id)}
                           type="button"
+                          role="option"
+                          aria-selected={idx === sugestaoAtiva}
+                          tabIndex={-1}
                           onClick={() => handleSelecionarMedicamento(med)}
                           className={cn(
                             'w-full px-4 py-3 text-left transition-colors border-b border-[var(--border-primary)] last:border-b-0 first:rounded-t-xl last:rounded-b-xl',

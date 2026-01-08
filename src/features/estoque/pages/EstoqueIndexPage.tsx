@@ -9,10 +9,9 @@ import {
   AlertTriangle,
   ArrowRight,
 } from 'lucide-react'
-import { medicamentoService, type MedicamentoResponseDTO } from '@/features/medicamentos/api/medicamentoService'
+import { medicamentoService } from '@/features/medicamentos/api/medicamentoService'
 import { alertaService } from '@/features/alertas/api/alertaService'
 import { useToast } from '@/components/toast/ToastProvider'
-import { cn } from '@/lib/utils'
 
 interface StockStats {
   totalMedicamentos: number

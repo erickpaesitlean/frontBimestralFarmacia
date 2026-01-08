@@ -28,7 +28,7 @@ const medicamentoSchema = z.object({
   ativo: z.boolean().optional(),
 })
 
-type MedicamentoFormData = z.infer<typeof medicamentoSchema>
+type MedicamentoFormData = z.input<typeof medicamentoSchema>
 
 export function MedicamentoFormPage() {
   const { id } = useParams<{ id: string }>()
@@ -56,7 +56,6 @@ export function MedicamentoFormPage() {
     },
   })
 
-  const precoValue = watch('preco')
   const ativoValue = watch('ativo') ?? true
   const categoriaIdValue = watch('categoriaId')
 
@@ -166,8 +165,8 @@ export function MedicamentoFormPage() {
   async function onSubmit(data: MedicamentoFormData) {
     try {
       // Garantir que quantidadeEstoque seja sempre um número válido
-      const quantidadeEstoque =
-        Number.isNaN(data.quantidadeEstoque) || data.quantidadeEstoque === undefined ? 0 : data.quantidadeEstoque
+      const quantidadeEstoque = Number(data.quantidadeEstoque ?? 0)
+      const quantidadeEstoqueSafe = Number.isFinite(quantidadeEstoque) ? quantidadeEstoque : 0
 
       const payload: MedicamentoRequestDTO = {
         nome: data.nome,
@@ -176,10 +175,10 @@ export function MedicamentoFormPage() {
         preco: data.preco,
         // Na criação, sempre envia um número (0 se não informado). No PUT, só envia se > 0 (entrada adicional)
         quantidadeEstoque: isEdit
-          ? quantidadeEstoque > 0
-            ? quantidadeEstoque
+          ? quantidadeEstoqueSafe > 0
+            ? quantidadeEstoqueSafe
             : undefined
-          : quantidadeEstoque, // Na criação, sempre envia número (0 se não informado)
+          : quantidadeEstoqueSafe, // Na criação, sempre envia número (0 se não informado)
         dataValidade: data.dataValidade,
         ativo: data.ativo,
       }

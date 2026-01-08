@@ -30,6 +30,11 @@ export function EstoqueSaidaPage() {
   const [sugestaoAtiva, setSugestaoAtiva] = useState(0)
   const medicamentoInputRef = useRef<HTMLInputElement>(null)
 
+  const medicamentoInputId = 'estoque-saida-medicamento-input'
+  const medicamentoListboxId = 'estoque-saida-medicamento-listbox'
+  const medicamentoErrorId = 'estoque-saida-medicamento-error'
+  const getMedicamentoOptionId = (id: number) => `estoque-saida-medicamento-option-${id}`
+
   const {
     register,
     handleSubmit,
@@ -183,6 +188,7 @@ export function EstoqueSaidaPage() {
                   <Package className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-tertiary)] pointer-events-none stroke-[1.75] z-10" />
                   <input
                     ref={medicamentoInputRef}
+                    id={medicamentoInputId}
                     type="text"
                     value={medicamentoBusca}
                     onChange={(e) => {
@@ -197,6 +203,18 @@ export function EstoqueSaidaPage() {
                       if (medicamentoBusca.trim().length > 0) setMostrarSugestoes(true)
                     }}
                     placeholder="Digite o nome do medicamento"
+                    role="combobox"
+                    aria-autocomplete="list"
+                    aria-haspopup="listbox"
+                    aria-expanded={mostrarSugestoes}
+                    aria-controls={medicamentoListboxId}
+                    aria-activedescendant={
+                      mostrarSugestoes && medicamentosFiltrados[sugestaoAtiva]
+                        ? getMedicamentoOptionId(medicamentosFiltrados[sugestaoAtiva].id)
+                        : undefined
+                    }
+                    aria-invalid={!!errors.medicamentoId}
+                    aria-describedby={errors.medicamentoId ? medicamentoErrorId : undefined}
                     className={cn(
                       'w-full pl-11 pr-10 py-2.5',
                       'bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl',
@@ -212,6 +230,7 @@ export function EstoqueSaidaPage() {
                       onClick={handleLimparMedicamento}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-red-500 transition-colors z-10"
                       title="Limpar seleção"
+                      aria-label="Limpar seleção de medicamento"
                     >
                       <X className="w-4 h-4 stroke-[2]" />
                     </button>
@@ -221,6 +240,9 @@ export function EstoqueSaidaPage() {
                 <AnimatePresence>
                   {mostrarSugestoes && medicamentoBusca.trim().length > 0 && (
                     <motion.div
+                      id={medicamentoListboxId}
+                      role="listbox"
+                      aria-label="Sugestões de medicamentos"
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
@@ -228,12 +250,18 @@ export function EstoqueSaidaPage() {
                       className="absolute left-0 right-0 z-[100] mt-1 bg-[var(--bg-secondary)] border border-[var(--border-primary)] rounded-xl shadow-2xl max-h-64 overflow-y-auto"
                     >
                       {medicamentosFiltrados.length === 0 ? (
-                        <div className="px-4 py-3 text-sm text-[var(--text-secondary)]">Nenhum medicamento encontrado.</div>
+                        <div role="status" className="px-4 py-3 text-sm text-[var(--text-secondary)]">
+                          Nenhum medicamento encontrado.
+                        </div>
                       ) : (
                         medicamentosFiltrados.map((med, idx) => (
                           <button
                             key={med.id}
+                            id={getMedicamentoOptionId(med.id)}
                             type="button"
+                            role="option"
+                            aria-selected={idx === sugestaoAtiva}
+                            tabIndex={-1}
                             onClick={() => handleSelecionarMedicamento(med)}
                             className={cn(
                               'w-full px-4 py-3 text-left transition-colors border-b border-[var(--border-primary)] last:border-b-0 first:rounded-t-xl last:rounded-b-xl',
@@ -254,7 +282,12 @@ export function EstoqueSaidaPage() {
                 </AnimatePresence>
 
                 {errors.medicamentoId && (
-                  <p className="mt-1.5 text-sm text-red-600 dark:text-red-400 font-medium">{errors.medicamentoId.message}</p>
+                  <p
+                    id={medicamentoErrorId}
+                    className="mt-1.5 text-sm text-red-600 dark:text-red-400 font-medium"
+                  >
+                    {errors.medicamentoId.message}
+                  </p>
                 )}
               </div>
 
