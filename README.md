@@ -1,43 +1,29 @@
-# 💊 Sistema de Gestão de Farmácia - Frontend
+# Sistema de Gestão de Farmácia (Frontend)
 
-Frontend desenvolvido em **React + TypeScript** para gerenciamento completo de farmácia.
+Frontend em **React + TypeScript (Vite)** que consome a API do **backend Spring Boot**.
 
-> ⚠️ **Este frontend consome a API REST do backend em Java/Spring Boot construído anteriormente.**
+## Como executar
 
-## 🚀 Tecnologias
+### Requisitos
 
-React 18 • TypeScript • Vite • TailwindCSS • Axios • React Hook Form + Zod
+- **Node.js** (LTS recomendado) + **npm**
+- **Backend Spring Boot** rodando (padrão: `http://localhost:8080`)
 
-## 📋 Funcionalidades
-
-- **Categorias** - Gerenciamento completo
-- **Clientes** - CRUD com validação de CPF e idade (18+)
-- **Medicamentos** - CRUD com controle de status e histórico
-- **Estoque** - Entrada/saída e movimentações
-- **Vendas** - Carrinho com múltiplos itens e validações
-- **Alertas** - Estoque baixo e validade próxima
-
-## 🚀 Início Rápido
-
-### Pré-requisitos
-
-✅ **Backend em Java/Spring Boot rodando** (porta 8080)
-
-### Instalação
+### 1) Instalar dependências
 
 ```bash
 npm install
 ```
 
-### Configuração
+### 2) Configurar URL do backend
 
-Crie um arquivo `.env` apontando para o backend:
+Crie um arquivo `.env` na raiz do projeto:
 
 ```env
 VITE_API_BASE_URL=http://localhost:8080
 ```
 
-### Executar
+### 3) Subir o frontend
 
 ```bash
 npm run dev
@@ -45,31 +31,31 @@ npm run dev
 
 Acesse: `http://localhost:5173`
 
-### Credenciais
+## Conexão com o backend (Spring Boot)
 
-**Produção:**
-- Usuário: `kekejava`
-- Senha: `keke059p`
+- **Base URL**: definida em `VITE_API_BASE_URL`
+- **CORS**: o backend deve permitir origem do front (`http://localhost:5173`)
+- **Autenticação**: HTTP Basic (conforme implementado no backend)
 
-## 📦 Scripts
+Se aparecer erro de conexão no login, verifique:
+
+- backend está rodando e acessível em `http://localhost:8080`
+- CORS liberado para `http://localhost:5173`
+- `.env` configurado corretamente (reinicie o `npm run dev` após alterar)
+
+## Scripts úteis
 
 ```bash
-npm run dev      # Desenvolvimento
-npm run build    # Build de produção
-npm run lint     # Verificar código
-npm run preview  # Preview do build
+npm run dev
+npm run build
+npm run preview
+npm run lint
 ```
 
-## 📝 Observações
+## Notas rápidas
 
-- **Estoque**: Campo de quantidade na edição adiciona ao estoque existente (use `0` para não adicionar)
-- **Vendas**: Validação automática de idade, status, validade e estoque
-- **Autenticação**: HTTP Basic Auth com token em sessionStorage
+- **Estoque (edição de medicamento)**: a “quantidade” no modo edição é tratada como **entrada adicional** (use `0` para não adicionar).
 
-## 🔗 Backend
+## Documentação do backend
 
-Este frontend é a interface para o **backend em Java/Spring Boot** construído anteriormente.
-
-- **Autenticação**: HTTP Basic Auth
-- **Endpoints**: Ver [REQUISITOS_BACKEND_FARMACIA.md](./REQUISITOS_BACKEND_FARMACIA.md)
-- **Porta padrão**: 8080
+- Requisitos/Endpoints: `REQUISITOS_BACKEND_FARMACIA.md`

@@ -5,17 +5,19 @@ import { cn } from '@/lib/utils'
 interface FormCardProps {
   children: ReactNode
   className?: string
+  allowOverflow?: boolean
 }
 
-export function FormCard({ children, className }: FormCardProps) {
+export function FormCard({ children, className, allowOverflow = false }: FormCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        'bg-[var(--bg-secondary)] rounded-card border border-[var(--border-primary)] shadow-drogaria overflow-hidden',
+        'bg-[var(--bg-secondary)] rounded-card border border-[var(--border-primary)] shadow-drogaria',
         'max-w-4xl mx-auto',
+        !allowOverflow && 'overflow-hidden',
         className
       )}
     >

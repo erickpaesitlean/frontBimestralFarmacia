@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { LogIn } from 'lucide-react'
 import { useAuth } from '@/auth/AuthContext'
 import { useToast } from '@/components/toast/ToastProvider'
+import { useTheme } from '@/contexts/ThemeContext'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
@@ -22,6 +23,7 @@ type LoginFormData = z.infer<typeof loginSchema>
 export function LoginPage() {
   const navigate = useNavigate()
   const { login } = useAuth()
+  const { theme } = useTheme()
   const { showToast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -103,7 +105,7 @@ export function LoginPage() {
                 className="inline-flex items-center justify-center mb-6"
               >
                 <img
-                  src="/DSP_Marca_130716-01.png"
+                  src={theme === 'dark' ? '/DSP_MarcaDark_130716-01.PNG' : '/DSP_Marca_130716-01.png'}
                   alt="Drogaria SP Logo"
                   className="h-12 w-auto object-contain"
                 />

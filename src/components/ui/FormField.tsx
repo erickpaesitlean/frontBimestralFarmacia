@@ -46,7 +46,12 @@ export const FormField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Form
 
         <div className="relative">
           {Icon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] pointer-events-none">
+            <div
+              className={cn(
+                'absolute left-3 text-[var(--text-tertiary)] pointer-events-none',
+                as === 'textarea' ? 'top-3' : 'top-1/2 -translate-y-1/2'
+              )}
+            >
               <Icon className="w-5 h-5 stroke-[1.75]" />
             </div>
           )}
@@ -54,7 +59,7 @@ export const FormField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Form
           {as === 'textarea' ? (
             <textarea
               ref={ref as React.ForwardedRef<HTMLTextAreaElement>}
-              className={cn(baseInputClasses, 'resize-none min-h-[100px]')}
+              className={cn(baseInputClasses, Icon && 'pt-3', 'resize-none min-h-[100px]')}
               {...inputProps}
             />
           ) : (

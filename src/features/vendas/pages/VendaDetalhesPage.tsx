@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { vendaService, type VendaResumoResponseDTO } from '../api/vendaService'
 import { useToast } from '@/components/toast/ToastProvider'
 import { Button } from '@/components/ui/Button'
@@ -36,7 +37,7 @@ export function VendaDetalhesPage() {
   }
 
   if (isLoading) {
-    return <div className="text-center py-8">Carregando...</div>
+    return <div className="text-center py-8 text-[var(--text-secondary)]">Carregando...</div>
   }
 
   if (!venda) {
@@ -46,45 +47,46 @@ export function VendaDetalhesPage() {
   return (
     <div>
       <div className="mb-6">
-        <Button variant="ghost" onClick={() => navigate('/vendas/listar')} className="mb-4">
-          ← Voltar
+        <Button variant="ghost" onClick={() => navigate('/vendas/listar')} className="mb-4 gap-2">
+          <ArrowLeft className="w-4 h-4 stroke-[1.75]" />
+          Voltar
         </Button>
-        <h1 className="text-2xl font-bold text-slate-900">Detalhes da Venda #{venda.id}</h1>
+        <h1 className="text-2xl font-bold text-[var(--text-primary)]">Detalhes da Venda #{venda.id}</h1>
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-200 p-6 space-y-6">
+      <div className="bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-primary)] p-6 space-y-6">
         <div className="grid grid-cols-2 gap-6">
           <div>
-            <p className="text-sm text-slate-500">Data da Venda</p>
-            <p className="text-lg font-medium text-slate-900">
+            <p className="text-sm text-[var(--text-secondary)]">Data da Venda</p>
+            <p className="text-lg font-medium text-[var(--text-primary)]">
               {new Date(venda.dataVenda).toLocaleString('pt-BR')}
             </p>
           </div>
           <div>
-            <p className="text-sm text-slate-500">Cliente</p>
-            <p className="text-lg font-medium text-slate-900">{venda.cliente.nome}</p>
+            <p className="text-sm text-[var(--text-secondary)]">Cliente</p>
+            <p className="text-lg font-medium text-[var(--text-primary)]">{venda.cliente.nome}</p>
           </div>
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Itens</h2>
-          <div className="border border-slate-200 rounded-lg overflow-hidden">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">Itens</h2>
+          <div className="border border-[var(--border-primary)] rounded-lg overflow-hidden">
             <table className="w-full">
-              <thead className="bg-slate-50">
+              <thead className="bg-[var(--bg-tertiary)]">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Medicamento</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Quantidade</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">Preço Unitário</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase">Subtotal</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">Medicamento</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">Quantidade</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">Preço Unitário</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-[var(--text-secondary)] uppercase">Subtotal</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-[var(--border-primary)]">
                 {venda.itens.map((item, index) => (
-                  <tr key={index}>
-                    <td className="px-4 py-3 text-sm text-slate-900">{item.medicamentoNome}</td>
-                    <td className="px-4 py-3 text-sm text-slate-600">{item.quantidade}</td>
-                    <td className="px-4 py-3 text-sm text-slate-600">{formatCurrency(item.precoUnitario)}</td>
-                    <td className="px-4 py-3 text-sm font-medium text-slate-900 text-right">
+                  <tr key={index} className="hover:bg-[var(--bg-hover)] transition-colors">
+                    <td className="px-4 py-3 text-sm text-[var(--text-primary)]">{item.medicamentoNome}</td>
+                    <td className="px-4 py-3 text-sm text-[var(--text-secondary)]">{item.quantidade}</td>
+                    <td className="px-4 py-3 text-sm text-[var(--text-secondary)]">{formatCurrency(item.precoUnitario)}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-[var(--text-primary)] text-right">
                       {formatCurrency(item.subtotal)}
                     </td>
                   </tr>
@@ -94,10 +96,10 @@ export function VendaDetalhesPage() {
           </div>
         </div>
 
-        <div className="border-t pt-4">
+        <div className="border-t border-[var(--border-primary)] pt-4">
           <div className="flex justify-between items-center">
-            <span className="text-xl font-semibold text-slate-900">Total:</span>
-            <span className="text-3xl font-bold text-blue-600">{formatCurrency(venda.valorTotal)}</span>
+            <span className="text-xl font-semibold text-[var(--text-primary)]">Total:</span>
+            <span className="text-3xl font-bold text-drogaria-accent dark:text-[var(--drogaria-accent)]">{formatCurrency(venda.valorTotal)}</span>
           </div>
         </div>
       </div>

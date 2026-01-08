@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Layers, Users, Pill, Receipt, TrendingUp, ArrowRight } from 'lucide-react'
+import { Layers, Users, Pill, Receipt, TrendingUp, ArrowRight, AlertTriangle, Clock } from 'lucide-react'
 import { api } from '@/api/axios'
+import { alertaService, type AlertaEstoqueResponseDTO, type AlertaValidadeResponseDTO } from '@/features/alertas/api/alertaService'
 import { useToast } from '@/components/toast/ToastProvider'
 import { cn } from '@/lib/utils'
 
@@ -23,6 +24,9 @@ export function DashboardPage() {
     vendas: 0,
   })
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingAlertas, setIsLoadingAlertas] = useState(true)
+  const [alertaEstoque, setAlertaEstoque] = useState<AlertaEstoqueResponseDTO | null>(null)
+  const [alertaValidade, setAlertaValidade] = useState<AlertaValidadeResponseDTO | null>(null)
 
   useEffect(() => {
     async function loadStats() {
@@ -47,7 +51,25 @@ export function DashboardPage() {
       }
     }
 
+    async function loadAlertasDashboard() {
+      try {
+        setIsLoadingAlertas(true)
+        const [estoque, validade] = await Promise.all([
+          alertaService.estoqueBaixo(10),
+          alertaService.validadeProxima(30),
+        ])
+        setAlertaEstoque(estoque)
+        setAlertaValidade(validade)
+      } catch (error) {
+        // Não travar o dashboard por isso — só notificar
+        showToast('error', 'Erro ao carregar alertas do dashboard')
+      } finally {
+        setIsLoadingAlertas(false)
+      }
+    }
+
     loadStats()
+    loadAlertasDashboard()
   }, [showToast])
 
   const statCards = [
@@ -180,6 +202,94 @@ export function DashboardPage() {
             </motion.button>
           )
         })}
+      </div>
+
+      {/* Alertas (padrão 10) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        {/* Estoque baixo */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.35 }}
+          className="bg-[var(--bg-secondary)] rounded-card p-6 border border-[var(--border-primary)] shadow-drogaria"
+        >
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 stroke-[1.75]" />
+              <div>
+                <h2 className="text-h3 text-[var(--text-primary)]">Estoque baixo</h2>
+              </div>
+            </div>
+          </div>
+
+          {isLoadingAlertas ? (
+            <p className="text-sm text-[var(--text-secondary)]">Carregando alertas...</p>
+          ) : !alertaEstoque ? (
+            <p className="text-sm text-[var(--text-secondary)]">Não foi possível carregar.</p>
+          ) : alertaEstoque.medicamentos.length === 0 ? (
+            <p className="text-sm text-[var(--text-secondary)]">Nenhum medicamento com estoque baixo.</p>
+          ) : (
+            <div className="space-y-2">
+              {alertaEstoque.medicamentos.slice(0, 10).map((med) => (
+                <div
+                  key={med.id}
+                  className="flex items-center justify-between gap-3 p-3 rounded-lg border border-[var(--border-primary)] bg-[var(--bg-tertiary)]"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-[var(--text-primary)] truncate">{med.nome}</p>
+                    <p className="text-xs text-[var(--text-tertiary)] truncate">{med.categoria}</p>
+                  </div>
+                  <span className="inline-flex px-2.5 py-1 text-xs font-bold rounded-full bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-700 flex-shrink-0">
+                    {med.quantidadeEstoque}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </motion.div>
+
+        {/* Validade próxima */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.45 }}
+          className="bg-[var(--bg-secondary)] rounded-card p-6 border border-[var(--border-primary)] shadow-drogaria"
+        >
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-yellow-600 dark:text-yellow-400 stroke-[1.75]" />
+              <div>
+                <h2 className="text-h3 text-[var(--text-primary)]">Validade próxima</h2>
+                <p className="text-xs text-[var(--text-tertiary)]">Próximos 30 dias</p>
+              </div>
+            </div>
+          </div>
+
+          {isLoadingAlertas ? (
+            <p className="text-sm text-[var(--text-secondary)]">Carregando alertas...</p>
+          ) : !alertaValidade ? (
+            <p className="text-sm text-[var(--text-secondary)]">Não foi possível carregar.</p>
+          ) : alertaValidade.medicamentos.length === 0 ? (
+            <p className="text-sm text-[var(--text-secondary)]">Nenhum medicamento com validade próxima.</p>
+          ) : (
+            <div className="space-y-2">
+              {alertaValidade.medicamentos.slice(0, 10).map((med) => (
+                <div
+                  key={med.id}
+                  className="flex items-center justify-between gap-3 p-3 rounded-lg border border-[var(--border-primary)] bg-[var(--bg-tertiary)]"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-[var(--text-primary)] truncate">{med.nome}</p>
+                    <p className="text-xs text-[var(--text-tertiary)] truncate">{med.categoria}</p>
+                  </div>
+                  <span className="inline-flex px-2.5 py-1 text-xs font-bold rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700 flex-shrink-0">
+                    {new Date(med.dataValidade).toLocaleDateString('pt-BR')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </motion.div>
       </div>
 
       {/* Quick Actions */}

@@ -8,7 +8,6 @@ import {
   Pill,
   Package,
   Receipt,
-  AlertTriangle,
   LogOut,
   Menu,
   X,
@@ -17,6 +16,7 @@ import {
 import { useAuth } from '@/auth/AuthContext'
 import { Button } from '@/components/ui/Button'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { useTheme } from '@/contexts/ThemeContext'
 import { cn } from '@/lib/utils'
 
 const menuItems = [
@@ -26,11 +26,11 @@ const menuItems = [
   { path: '/medicamentos', label: 'Medicamentos', icon: Pill },
   { path: '/estoque', label: 'Estoque', icon: Package },
   { path: '/vendas', label: 'Vendas', icon: Receipt },
-  { path: '/alertas', label: 'Alertas', icon: AlertTriangle },
 ]
 
 export function AppLayout() {
   const { logout, username } = useAuth()
+  const { theme } = useTheme()
   const navigate = useNavigate()
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -86,7 +86,7 @@ export function AppLayout() {
         <div className="h-16 flex items-center justify-between px-4 lg:px-6 border-b border-white/20 dark:border-[var(--border-primary)] flex-shrink-0 bg-white dark:bg-[var(--bg-secondary)]">
           <div className="flex items-center">
             <img
-              src="/DSP_Marca_130716-01.png"
+              src={theme === 'dark' ? '/DSP_MarcaDark_130716-01.PNG' : '/DSP_Marca_130716-01.png'}
               alt="Drogaria SP Logo"
               className="h-12 w-auto object-contain"
             />
@@ -186,7 +186,7 @@ export function AppLayout() {
             !sidebarOpen ? 'block' : 'hidden' // Visível apenas quando sidebar fechada
           )}>
             <img
-              src="/DSP_Marca_130716-01.png"
+              src={theme === 'dark' ? '/DSP_MarcaDark_130716-01.PNG' : '/DSP_Marca_130716-01.png'}
               alt="Drogaria SP Logo"
               className="h-10 w-auto object-contain"
             />
